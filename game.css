@@ -32,3 +32,12 @@ body.light-mode .topbar,body.light-mode .side-panel,body.light-mode .control-dec
 body.light-mode button,body.light-mode input,body.light-mode textarea,body.light-mode select{color:var(--text);background:#f8fbfd;border-color:#9eb3c1}
 body.light-mode .flight-strip,body.light-mode .panel-block,body.light-mode .radio-line,body.light-mode .kpi-grid div{background:#f4f8fa;color:var(--text)}
 body.light-mode .stage,body.light-mode #map{background:#dbe7ee}
+
+/* v0.3 simulator environment */
+.freeplay-options{border:1px solid var(--line);border-radius:8px;padding:0 12px 12px;margin-top:14px;background:rgba(20,40,54,.28)}
+body[data-environment="day"] .stage-wrap{filter:none}
+body[data-environment="dusk"] .stage-wrap{filter:sepia(.12) brightness(.72) saturate(.9)}
+body[data-environment="night"] .stage-wrap{filter:brightness(.48) saturate(.78)}
+body[data-environment="dusk"] .topbar{background:#101722}
+body[data-environment="night"] .topbar{background:#03080d}
+.freeplay-strip{border-left-color:var(--green)}
