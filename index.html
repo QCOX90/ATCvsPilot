@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#07131f">
-  <title>MEM ATC Trainer</title>
+  <title>MEM ATC Simulator</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
-  <link rel="stylesheet" href="game.css?v=0.2.1">
+  <link rel="stylesheet" href="game.css?v=0.3.0">
 </head>
 <body>
   <div id="gameShell" class="game-shell">
     <header class="topbar">
-      <div class="brand"><span class="brand-kicker">KMEM</span><strong>MEM ATC TRAINER</strong><small>Frederick W Smith Intl/Memphis</small></div>
+      <div class="brand"><span class="brand-kicker">KMEM</span><strong>MEM ATC SIMULATOR</strong><small>Frederick W Smith Intl/Memphis</small></div>
       <div class="top-status"><span id="topPosition">GROUND</span><span id="topRole">PILOT</span><span id="topDifficulty">STUDENT</span></div>
       <div class="top-frequency"><small id="freqLabel">MEM GROUND</small><strong id="freqValue">121.000</strong></div>
       <div class="top-weather"><small>SIM ATIS <span id="atisLetter">B</span></small><strong id="windText">090° / 8 KT</strong><span id="altimeterText">A30.05</span></div>
@@ -110,7 +110,12 @@
 
   <div id="startScreen" class="modal-backdrop open">
     <section class="start-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
-      <div class="start-heading"><span>KMEM TRAINING SIMULATOR</span><h1 id="startTitle">Choose your position</h1><p>Train from either side of the frequency: work traffic as the controller, or follow ATC instructions as the pilot.</p></div>
+      <div class="start-heading"><span>KMEM AVIATION SIMULATOR · v0.3</span><h1 id="startTitle">Start a Memphis session</h1><p>Free Play keeps the airport alive around you. Training keeps the structured FAA-based lessons.</p></div>
+      <div class="picker-section"><h2>Experience</h2><div id="experiencePicker" class="choice-grid two"><button data-experience="freeplay" class="selected">FREE PLAY<small>Living airport · no score · play at your pace</small></button><button data-experience="training">TRAINING<small>Objectives · grading · instructor feedback</small></button></div></div>
+      <div id="freeplayOptions" class="freeplay-options">
+        <div class="picker-section"><h2>Traffic</h2><div id="trafficPicker" class="choice-grid four"><button data-traffic="relaxed" class="selected">RELAXED<small>Easy-going traffic</small></button><button data-traffic="normal">NORMAL<small>Steady operation</small></button><button data-traffic="rush">HUB RUSH<small>Busy FedEx bank</small></button><button data-traffic="chaos">CHAOS<small>High workload</small></button></div></div>
+        <div class="picker-section"><h2>Environment</h2><div id="environmentPicker" class="choice-grid three"><button data-environment="day" class="selected">DAY<small>Bright ramp and airfield</small></button><button data-environment="dusk">DUSK<small>Evening operation</small></button><button data-environment="night">NIGHT<small>Dark airfield</small></button></div></div>
+      </div>
       <div class="picker-section"><h2>Position</h2><div id="positionPicker" class="choice-grid four"><button data-position="ground" class="selected">GROUND<small>Taxi, hold-short, crossings</small></button><button data-position="tower">TOWER<small>Runway, landing, departures</small></button><button data-position="approach">APPROACH<small>Vectors, sequencing, ILS</small></button><button data-position="departure">DEPARTURE<small>Climb, headings, handoffs</small></button></div></div>
       <div class="picker-section"><h2>Role</h2><div id="rolePicker" class="choice-grid two"><button data-role="pilot" class="selected">PILOT<small>Fly or taxi the clearance</small></button><button data-role="controller">CONTROLLER<small>Issue and manage clearances</small></button></div></div>
       <div class="picker-section"><h2>Difficulty</h2><div id="difficultyPicker" class="choice-grid three"><button data-difficulty="student" class="selected">STUDENT<small>Hints + route guidance</small></button><button data-difficulty="academy">ACADEMY<small>Limited assistance</small></button><button data-difficulty="challenge">CHALLENGE<small>Traffic + no route hint</small></button></div></div>
@@ -126,12 +131,13 @@
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-  <script src="map-data.js?v=0.2.1"></script>
-  <script src="gate-730-extension.js?v=0.2.1"></script>
-  <script src="airport-reference.js?v=0.2.1"></script>
-  <script src="phraseology.js?v=0.2.1"></script>
-  <script src="surface-engine.js?v=0.2.1"></script>
-  <script src="radar-engine.js?v=0.2.1"></script>
-  <script src="game.js?v=0.2.1"></script>
+  <script src="map-data.js?v=0.3.0"></script>
+  <script src="gate-730-extension.js?v=0.3.0"></script>
+  <script src="airport-reference.js?v=0.3.0"></script>
+  <script src="phraseology.js?v=0.3.0"></script>
+  <script src="surface-engine.js?v=0.3.0"></script>
+  <script src="radar-engine.js?v=0.3.0"></script>
+  <script src="game.js?v=0.3.0"></script>
+  <script src="simulator-mode.js?v=0.3.0"></script>
 </body>
 </html>
