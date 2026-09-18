@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07131f">
+  <title>MEM ATC Trainer</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="game.css?v=0.1.1">
+</head>
+<body>
+  <div id="gameShell" class="game-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-kicker">KMEM</span><strong>MEM ATC TRAINER</strong><small>Frederick W Smith Intl/Memphis</small></div>
+      <div class="top-status"><span id="topPosition">GROUND</span><span id="topRole">PILOT</span><span id="topDifficulty">STUDENT</span></div>
+      <div class="top-frequency"><small id="freqLabel">MEM GROUND</small><strong id="freqValue">121.000</strong></div>
+      <div class="top-weather"><small>SIM ATIS <span id="atisLetter">B</span></small><strong id="windText">090° / 8 KT</strong><span id="altimeterText">A30.05</span></div>
+      <div class="top-actions">
+        <button id="voiceToggle" type="button">VOICE ON</button>
+        <button id="viewToggle" type="button">TOP DOWN</button>
+        <button id="menuBtn" type="button">MENU</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="side-panel strips-panel">
+        <div class="panel-title"><span>FLIGHT STRIPS</span><small id="stripCount">0 ACTIVE</small></div>
+        <div id="flightStrips" class="flight-strips"></div>
+        <div class="panel-block compact">
+          <div class="mini-title">POSITION STATUS</div>
+          <div class="kpi-grid">
+            <div><span>Score</span><strong id="scoreValue">100</strong></div>
+            <div><span>Errors</span><strong id="errorValue">0</strong></div>
+            <div><span>Time</span><strong id="elapsedValue">00:00</strong></div>
+            <div><span>Level</span><strong id="levelValue">STUDENT</strong></div>
+          </div>
+        </div>
+        <div class="panel-block compact safety-card">
+          <div class="mini-title">TRAINING STATUS</div>
+          <p id="trainingStatus">Scenario not started.</p>
+        </div>
+      </aside>
+
+      <section class="stage-wrap">
+        <div id="surfaceStage" class="stage active">
+          <div id="map"></div>
+          <div class="hud top-left-hud">
+            <div><span>CALLSIGN</span><strong id="hudCallsign">—</strong></div>
+            <div><span>STATE</span><strong id="hudState">READY</strong></div>
+          </div>
+          <div class="hud bottom-left-hud">
+            <div><span>GS</span><strong id="hudSpeed">0 KT</strong></div>
+            <div><span>HDG</span><strong id="hudHeading">000</strong></div>
+            <div><span>RWY</span><strong id="hudRunway">—</strong></div>
+            <div><span>TXWY</span><strong id="hudTaxiway">—</strong></div>
+          </div>
+          <div id="surfaceMessage" class="surface-message">Select a scenario to begin.</div>
+        </div>
+        <div id="radarStage" class="stage">
+          <canvas id="radarCanvas" aria-label="ATC radar simulation"></canvas>
+          <div class="radar-legend">MEM RADAR · RANGE <span id="radarRange">20</span> NM</div>
+        </div>
+      </section>
+
+      <aside class="side-panel comms-panel">
+        <div class="panel-title"><span>RADIO / TRAINING</span><small id="radioStatus">MONITORING</small></div>
+        <div id="radioLog" class="radio-log" aria-live="polite"></div>
+        <form id="radioForm" class="radio-form">
+          <label for="radioInput">Transmit / read back</label>
+          <textarea id="radioInput" rows="3" placeholder="Type your transmission…"></textarea>
+          <div class="radio-actions"><button id="micBtn" type="button">MIC</button><button id="transmitBtn" class="primary" type="submit">TRANSMIT</button></div>
+        </form>
+        <div class="panel-block objectives-block">
+          <div class="mini-title">OBJECTIVES</div>
+          <div id="objectives" class="objectives"></div>
+        </div>
+        <div class="panel-block debrief-block">
+          <div class="mini-title">INSTRUCTOR</div>
+          <div id="instructorText">Launch a scenario from the menu.</div>
+        </div>
+      </aside>
+    </main>
+
+    <section id="controlDeck" class="control-deck">
+      <div id="groundPilotControls" class="control-set">
+        <div class="control-cluster">
+          <span class="control-label">TAXI THROTTLE</span>
+          <button id="taxiSlow" type="button">5 KT</button><button id="taxiNormal" type="button">12 KT</button><button id="taxiFast" type="button">18 KT</button><button id="taxiBrake" class="danger" type="button">BRAKE</button>
+        </div>
+        <div class="control-cluster grow"><span class="control-label">NEXT TAXIWAY / TURN</span><div id="junctionChoices" class="junction-choices"><span class="muted">Move to a junction to choose a direction.</span></div></div>
+      </div>
+
+      <div id="controllerControls" class="control-set hidden">
+        <div class="control-cluster grow"><span class="control-label">QUICK PHRASEOLOGY</span><div id="quickCommands" class="quick-commands"></div></div>
+      </div>
+
+      <div id="radarPilotControls" class="control-set hidden">
+        <div class="radar-input"><label>Heading</label><input id="pilotHeading" type="number" min="1" max="360" value="270"></div>
+        <div class="radar-input"><label>Altitude</label><input id="pilotAltitude" type="number" min="0" max="20000" step="100" value="3000"></div>
+        <div class="radar-input"><label>Speed</label><input id="pilotSpeed" type="number" min="80" max="350" step="10" value="180"></div>
+        <button id="executePilotCmd" class="primary" type="button">SET AIRCRAFT</button>
+      </div>
+
+      <div id="towerPilotControls" class="control-set hidden">
+        <div class="control-cluster grow"><span class="control-label">AIRCRAFT ACTION</span><div id="towerActions" class="quick-commands"></div></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="startScreen" class="modal-backdrop open">
+    <section class="start-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+      <div class="start-heading"><span>KMEM TRAINING SIMULATOR</span><h1 id="startTitle">Choose your position</h1><p>Train from either side of the frequency: work traffic as the controller, or follow ATC instructions as the pilot.</p></div>
+      <div class="picker-section"><h2>Position</h2><div id="positionPicker" class="choice-grid four"><button data-position="ground" class="selected">GROUND<small>Taxi, hold-short, crossings</small></button><button data-position="tower">TOWER<small>Runway, landing, departures</small></button><button data-position="approach">APPROACH<small>Vectors, sequencing, ILS</small></button><button data-position="departure">DEPARTURE<small>Climb, headings, handoffs</small></button></div></div>
+      <div class="picker-section"><h2>Role</h2><div id="rolePicker" class="choice-grid two"><button data-role="pilot" class="selected">PILOT<small>Fly or taxi the clearance</small></button><button data-role="controller">CONTROLLER<small>Issue and manage clearances</small></button></div></div>
+      <div class="picker-section"><h2>Difficulty</h2><div id="difficultyPicker" class="choice-grid three"><button data-difficulty="student" class="selected">STUDENT<small>Hints + route guidance</small></button><button data-difficulty="academy">ACADEMY<small>Limited assistance</small></button><button data-difficulty="challenge">CHALLENGE<small>Traffic + no route hint</small></button></div></div>
+      <div class="picker-section"><h2>Scenario</h2><select id="scenarioSelect"></select><p id="scenarioDescription" class="scenario-description"></p></div>
+      <div class="start-footer"><div><strong>FAA-based training aid</strong><span>Not for navigation or operational ATC use.</span></div><button id="launchBtn" class="launch" type="button">START SESSION</button></div>
+    </section>
+  </div>
+
+  <div id="debriefModal" class="modal-backdrop">
+    <section class="debrief-card" role="dialog" aria-modal="true"><span class="debrief-kicker">SESSION COMPLETE</span><h2 id="debriefTitle">Scenario complete</h2><div class="debrief-score"><strong id="debriefScore">100</strong><span>/ 100</span></div><div id="debriefDetails" class="debrief-details"></div><div class="debrief-actions"><button id="restartScenario" type="button">RETRY</button><button id="backToMenu" class="primary" type="button">SCENARIO MENU</button></div></section>
+  </div>
+
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="map-data.js?v=0.1.1"></script>
+  <script src="gate-730-extension.js?v=0.1.1"></script>
+  <script src="airport-reference.js?v=0.1.1"></script>
+  <script src="phraseology.js?v=0.1.1"></script>
+  <script src="surface-engine.js?v=0.1.1"></script>
+  <script src="radar-engine.js?v=0.1.1"></script>
+  <script src="game.js?v=0.1.1"></script>
+</body>
+</html>
