@@ -47,7 +47,16 @@
   function extractAltitude(text){const raw=String(text||'').toLowerCase();let m=raw.match(/\b(?:descend|climb)(?:\s+and)?\s+maintain\s+([\d,]+)(?:\s*(?:feet|ft))?/);if(!m)m=raw.match(/\bmaintain\s+([\d,]+)(?:\s*(?:feet|ft))?/);if(m)return Number(m[1].replace(/,/g,''));m=raw.match(/\b(?:descend|climb)(?:\s+and)?\s+maintain\s+(one|two|three|four|five|six|seven|eight|nine)\s+thousand\b/);if(m)return Number(wordNums[m[1]])*1000;return null;}
   function extractSpeed(text){const s=normalize(text);let m=s.match(/\b(?:speed|reduce(?:\s+speed)?\s+to|maintain)\s+(\d{2,3})\s*(?:knots|kts)?\b/);return m?Number(m[1]):null;}
   function extractTurnDirection(text){const s=normalize(text);if(/\bturn\s+left\b/.test(s))return'left';if(/\bturn\s+right\b/.test(s))return'right';return null;}
-  function hasCallsign(text,callsign){const compact=compactCallsign(text),cs=compactCallsign(callsign);if(compact.includes(cs))return true;const digits=(cs.match(/\d+/)||[''])[0];return digits.length>=3&&compact.includes(digits);}
+  function hasCallsign(text,callsign){
+    const raw=String(text||''), compact=compactCallsign(raw), cs=compactCallsign(callsign);
+    if(compact.includes(cs))return true;
+    const expectedDigits=(cs.match(/\d+/)||[''])[0];
+    const spokenDigits=normalize(raw).split(/\s+/).filter(x=>/^\d$/.test(x)).join('');
+    const numericRuns=(normalize(raw).match(/\d+/g)||[]).join('');
+    const prefix=cs.replace(/\d/g,'');
+    const airlineOK=prefix==='FDX'?/\b(?:fedex|fed\s*ex|fdx)\b/i.test(raw):prefix==='UPS'?/\bups\b/i.test(raw):true;
+    return expectedDigits.length>=3&&airlineOK&&(compact.includes(expectedDigits)||spokenDigits.includes(expectedDigits)||numericRuns.includes(expectedDigits));
+  }
   function parse(text){const s=normalize(text);const actions={};for(const [k,rx] of Object.entries(actionPatterns))actions[k]=rx.test(s);return {raw:String(text||''),normalized:s,actions,runways:extractRunways(text),taxiways:extractTaxiways(text),heading:extractHeading(text),altitude:extractAltitude(text),speed:extractSpeed(text),turnDirection:extractTurnDirection(text)};}
   function scoreGroundClearance(text,expect){
     const p=parse(text),checks=[];const add=(name,ok,weight,detail)=>checks.push({name,ok,weight,detail});

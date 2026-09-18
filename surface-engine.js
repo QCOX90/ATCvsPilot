@@ -50,6 +50,29 @@
     for(const e of AIR_GRAPH_EDGES){state.edgeById.set(e.id,e);state.adj[e.a].push({to:e.b,edge:e});state.adj[e.b].push({to:e.a,edge:e});}
   }
 
+
+  function buildSurfaceMarkings(){
+    const features=[];
+    const seen=new Set();
+    // Runway designators from the FAA-aligned airport reference data.
+    for(const [name,r] of Object.entries(MEM_ATC_REFERENCE.runways||{})){
+      features.push({type:'Feature',properties:{kind:'runway-label',name},geometry:{type:'Point',coordinates:r.threshold}});
+    }
+    // Surface hold bars are generated at both ends of graph edges that cross a runway.
+    // This makes runway boundaries visible throughout the playable graph while keeping movement tied to MEMSim geometry.
+    for(const e of AIR_GRAPH_EDGES){
+      if(!e.runways?.length || !e.coords?.length) continue;
+      for(const endpoint of [0,e.coords.length-1]){
+        const c=e.coords[endpoint], other=e.coords[endpoint===0?Math.min(1,e.coords.length-1):Math.max(0,e.coords.length-2)];
+        const key=e.runways.join('/')+':'+c.map(v=>v.toFixed(6)).join(','); if(seen.has(key))continue; seen.add(key);
+        const h=headingDeg(c,other)+90, hr=h*Math.PI/180, half=10;
+        const a=metersToCoord(c,Math.sin(hr)*half,Math.cos(hr)*half), b=metersToCoord(c,-Math.sin(hr)*half,-Math.cos(hr)*half);
+        features.push({type:'Feature',properties:{kind:'holdbar',runway:e.runways.join('/')},geometry:{type:'LineString',coordinates:[a,b]}});
+      }
+    }
+    return {type:'FeatureCollection',features};
+  }
+
   function addMapSources(){
     const map=state.map;
     map.addSource('hub-polygons',{type:'geojson',data:HUB_POLYGONS});
@@ -59,6 +82,7 @@
     map.addSource('atc-taxi-labels',{type:'geojson',data:{type:'FeatureCollection',features:MEM_ATC_REFERENCE.taxiwayLabels.map((x,i)=>({type:'Feature',properties:{name:x.name,id:i},geometry:{type:'Point',coordinates:x.coord}}))}});
     map.addSource('atc-route',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
     map.addSource('atc-hold',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    map.addSource('atc-surface-markings',{type:'geojson',data:buildSurfaceMarkings()});
     map.addSource('atc-planes',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
 
     map.addLayer({id:'atc-runways',type:'fill',source:'airfield',filter:['==',['get','kind'],'runway'],paint:{'fill-color':'#3e4851','fill-opacity':.82}});
@@ -67,8 +91,10 @@
     map.addLayer({id:'atc-buildings',type:'fill-extrusion',source:'hub-polygons',minzoom:11,paint:{'fill-extrusion-color':'#253544','fill-extrusion-height':['coalesce',['get','height'],7],'fill-extrusion-opacity':.78}});
     map.addLayer({id:'atc-gates',type:'circle',source:'gates',paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,1.5,17,5.5],'circle-color':'#7cc7ef','circle-stroke-color':'#07131f','circle-stroke-width':1.4}});
     map.addLayer({id:'atc-route-line',type:'line',source:'atc-route',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':'#5ce1e6','line-width':['interpolate',['linear'],['zoom'],10,2,17,6],'line-opacity':.82,'line-dasharray':[1.5,1.4]}});
+    map.addLayer({id:'atc-hold-bars',type:'line',source:'atc-surface-markings',filter:['==',['get','kind'],'holdbar'],layout:{'line-cap':'butt'},paint:{'line-color':'#ffd21f','line-width':['interpolate',['linear'],['zoom'],10,1.5,15,3.2,19,7],'line-opacity':.96}});
+    map.addLayer({id:'atc-runway-designators',type:'symbol',source:'atc-surface-markings',filter:['==',['get','kind'],'runway-label'],minzoom:10,layout:{'text-field':['get','name'],'text-size':['interpolate',['linear'],['zoom'],10,11,15,16,19,23],'text-font':['Open Sans Bold'],'text-allow-overlap':true},paint:{'text-color':'#ffffff','text-halo-color':'#101820','text-halo-width':3}});
     map.addLayer({id:'atc-hold-circle',type:'circle',source:'atc-hold',paint:{'circle-radius':['interpolate',['linear'],['zoom'],10,3,17,9],'circle-color':'#ffbf47','circle-stroke-color':'#ffffff','circle-stroke-width':2}});
-    map.addLayer({id:'atc-taxiway-labels',type:'symbol',source:'atc-taxi-labels',minzoom:12,layout:{'text-field':['get','name'],'text-size':['interpolate',['linear'],['zoom'],12,8,16,12,19,16],'text-font':['Open Sans Bold'],'text-allow-overlap':true,'text-ignore-placement':true},paint:{'text-color':'#ffe58a','text-halo-color':'#07131f','text-halo-width':2}});
+    map.addLayer({id:'atc-taxiway-labels',type:'symbol',source:'atc-taxi-labels',minzoom:10,layout:{'text-field':['get','name'],'text-size':['interpolate',['linear'],['zoom'],10,10,14,13,17,17,19,20],'text-font':['Open Sans Bold'],'text-allow-overlap':true,'text-ignore-placement':true},paint:{'text-color':'#ffd21f','text-halo-color':'#050b10','text-halo-width':3}});
     map.addLayer({id:'atc-plane-labels',type:'symbol',source:'atc-planes',layout:{'text-field':['get','label'],'text-size':12,'text-offset':[0,1.5],'text-font':['Open Sans Bold'],'text-allow-overlap':true,'text-ignore-placement':true},paint:{'text-color':'#ffffff','text-halo-color':'#31105b','text-halo-width':2}});
     state.routeSourceReady=true;state.labelsReady=true;
   }
@@ -195,5 +221,15 @@
     return map;
   }
 
-  window.MEMSurface={state,init,createPlane,removePlane,clearPlanes,updatePlane,gateCoord,nearestNode,pathfind,findHoldTarget,showRoute,showHold,createManualDriver,driverChoices,chooseDriverEdge,stopDriver,autoTaxi,focusCoords,fitAirport,setView,setTaxiLabels,setBuildings,haversine,headingDeg,angleDiff,metersToCoord,nearestTaxiLabel};
+  
+  function setLightMode(light){
+    const map=state.map;if(!map)return;
+    const set=(id,prop,val)=>{try{if(map.getLayer(id))map.setPaintProperty(id,prop,val)}catch(e){}};
+    set('bg','background-color',light?'#dbe7ee':'#061018');
+    set('atc-runways','fill-color',light?'#77838c':'#3e4851');
+    set('atc-runway-outline','line-color',light?'#39454e':'#97a6b1');
+    set('atc-buildings','fill-extrusion-color',light?'#aebdca':'#253544');
+  }
+
+window.MEMSurface={setLightMode,state,init,createPlane,removePlane,clearPlanes,updatePlane,gateCoord,nearestNode,pathfind,findHoldTarget,showRoute,showHold,createManualDriver,driverChoices,chooseDriverEdge,stopDriver,autoTaxi,focusCoords,fitAirport,setView,setTaxiLabels,setBuildings,haversine,headingDeg,angleDiff,metersToCoord,nearestTaxiLabel};
 })();

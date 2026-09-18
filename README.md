@@ -161,3 +161,17 @@ The code is plain HTML/CSS/JavaScript so it is easy to inspect and modify. The t
 This package is intentionally flat so every runtime file can be uploaded directly into the repository root using GitHub's browser uploader. Do not create css/, data/, js/, or models/ folders for this build. GitHub Pages should publish from `main` / `(root)`.
 
 After replacing the files, wait for the Pages deployment to finish, then hard-refresh the site (Ctrl+F5).
+
+
+## v0.2.0 Surface Navigation
+- Enlarged FAA-diagram-derived taxiway labels and made them visible at lower zoom levels.
+- Added runway designator labels at each threshold.
+- Added persistent yellow hold-short bars at both sides of every runway-crossing edge in the MEMSim movement graph.
+- Existing scenario hold target remains highlighted separately.
+- Flat GitHub Pages build: upload these files directly to repository root.
+
+
+## v0.2.1 readback + light mode
+- Fixed spoken FedEx/FDX callsign recognition (for example, “FedEx one five zero zero”).
+- Readback errors now identify the exact item the parser did not recognize instead of showing a generic message.
+- Added a persistent LIGHT MODE / DARK MODE toggle in the top bar; light mode also brightens the surface map background/buildings/runways.
