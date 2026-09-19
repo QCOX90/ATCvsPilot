@@ -83,3 +83,7 @@
 
   window.MEMPhraseology={normalize,parse,scoreGroundClearance,scorePilotReadback,hasCallsign,callsignSpoken,runwaySpoken,taxiSpoken};
 })();
+
+
+// FAA Pilot/Controller Glossary-aligned interaction vocabulary (PCG terminology authority).
+window.MEM_PCG={source:'FAA Pilot/Controller Glossary',url:'https://www.faa.gov/air_traffic/publications/atpubs/pcg_html/',terms:['roger','wilco','unable','stand by','say again','affirmative','negative','go around','hold short','line up and wait','cleared for takeoff','cleared to land','taxi','cross','maintain','climb','descend','contact','monitor','ident','traffic','proceed direct']};

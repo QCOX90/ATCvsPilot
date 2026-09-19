@@ -75,6 +75,8 @@
 
   function addMapSources(){
     const map=state.map;
+    map.addSource('satellite',{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,attribution:'Tiles © Esri'});
+    map.addLayer({id:'satellite-imagery',type:'raster',source:'satellite',layout:{visibility:'none'},paint:{'raster-opacity':.94,'raster-saturation':-.08,'raster-contrast':.08}});
     map.addSource('hub-polygons',{type:'geojson',data:HUB_POLYGONS});
     map.addSource('hub-labels',{type:'geojson',data:HUB_LABELS});
     map.addSource('gates',{type:'geojson',data:GATES});
@@ -222,6 +224,14 @@
   }
 
   
+  function setMapMode(mode='diagram'){
+    const map=state.map;if(!map)return;
+    const sat=mode==='satellite';
+    try{if(map.getLayer('satellite-imagery'))map.setLayoutProperty('satellite-imagery','visibility',sat?'visible':'none')}catch(e){}
+    const opacity=sat?.28:.82;try{map.setPaintProperty('atc-runways','fill-opacity',opacity)}catch(e){}
+    try{map.setPaintProperty('atc-buildings','fill-extrusion-opacity',sat?.36:.78)}catch(e){}
+  }
+
   function setLightMode(light){
     const map=state.map;if(!map)return;
     const set=(id,prop,val)=>{try{if(map.getLayer(id))map.setPaintProperty(id,prop,val)}catch(e){}};
@@ -231,5 +241,5 @@
     set('atc-buildings','fill-extrusion-color',light?'#aebdca':'#253544');
   }
 
-window.MEMSurface={setLightMode,state,init,createPlane,removePlane,clearPlanes,updatePlane,gateCoord,nearestNode,pathfind,findHoldTarget,showRoute,showHold,createManualDriver,driverChoices,chooseDriverEdge,stopDriver,autoTaxi,focusCoords,fitAirport,setView,setTaxiLabels,setBuildings,haversine,headingDeg,angleDiff,metersToCoord,nearestTaxiLabel};
+window.MEMSurface={setMapMode,setLightMode,state,init,createPlane,removePlane,clearPlanes,updatePlane,gateCoord,nearestNode,pathfind,findHoldTarget,showRoute,showHold,createManualDriver,driverChoices,chooseDriverEdge,stopDriver,autoTaxi,focusCoords,fitAirport,setView,setTaxiLabels,setBuildings,haversine,headingDeg,angleDiff,metersToCoord,nearestTaxiLabel};
 })();

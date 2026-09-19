@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#07131f">
   <title>MEM ATC Simulator</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
-  <link rel="stylesheet" href="game.css?v=0.3.0">
+  <link rel="stylesheet" href="game.css?v=0.4.0">
 </head>
 <body>
   <div id="gameShell" class="game-shell">
@@ -18,7 +18,7 @@
       <div class="top-actions">
         <button id="voiceToggle" type="button">VOICE ON</button>
         <button id="viewToggle" type="button">TOP DOWN</button>
-        <button id="themeToggle" type="button">LIGHT MODE</button>
+        <button id="themeToggle" type="button">LIGHT MODE</button><button id="mapModeToggle" type="button">SATELLITE</button>
         <button id="menuBtn" type="button">MENU</button>
       </div>
     </header>
@@ -56,6 +56,9 @@
             <div><span>TXWY</span><strong id="hudTaxiway">—</strong></div>
           </div>
           <div id="surfaceMessage" class="surface-message">Select a scenario to begin.</div>
+          <div id="flightHud" class="flight-hud hidden">
+            <div><span>THR</span><strong id="simThrottle">0%</strong></div><div><span>IAS</span><strong id="simAirspeed">0 KT</strong></div><div><span>ALT</span><strong id="simAltitude">341 FT</strong></div><div><span>VS</span><strong id="simVS">0 FPM</strong></div><div><span>FLAPS</span><strong id="simFlaps">0</strong></div><div><span>GEAR</span><strong id="simGear">DOWN</strong></div>
+          </div>
         </div>
         <div id="radarStage" class="stage">
           <canvas id="radarCanvas" aria-label="ATC radar simulation"></canvas>
@@ -83,6 +86,12 @@
     </main>
 
     <section id="controlDeck" class="control-deck">
+      <div id="flightSimControls" class="control-set hidden">
+        <div class="sim-control-help"><strong>FLIGHT CONTROLS</strong><span>W/S throttle · A/D steer/bank · ↑/↓ pitch · Space brakes · F flaps · G gear · C camera</span></div>
+        <div class="sim-slider"><label>THROTTLE</label><input id="flightThrottle" type="range" min="0" max="100" value="0"></div>
+        <button id="parkingBrake" class="danger" type="button">PARK BRAKE</button>
+        <button id="flapsBtn" type="button">FLAPS 0</button><button id="gearBtn" type="button">GEAR DOWN</button>
+      </div>
       <div id="groundPilotControls" class="control-set">
         <div class="control-cluster">
           <span class="control-label">TAXI THROTTLE</span>
@@ -110,7 +119,7 @@
 
   <div id="startScreen" class="modal-backdrop open">
     <section class="start-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
-      <div class="start-heading"><span>KMEM AVIATION SIMULATOR · v0.3</span><h1 id="startTitle">Start a Memphis session</h1><p>Free Play keeps the airport alive around you. Training keeps the structured FAA-based lessons.</p></div>
+      <div class="start-heading"><span>KMEM AVIATION SIMULATOR · v0.4</span><h1 id="startTitle">Start a Memphis session</h1><p>Free Play keeps the airport alive around you. Training keeps the structured FAA-based lessons.</p></div>
       <div class="picker-section"><h2>Experience</h2><div id="experiencePicker" class="choice-grid two"><button data-experience="freeplay" class="selected">FREE PLAY<small>Living airport · no score · play at your pace</small></button><button data-experience="training">TRAINING<small>Objectives · grading · instructor feedback</small></button></div></div>
       <div id="freeplayOptions" class="freeplay-options">
         <div class="picker-section"><h2>Traffic</h2><div id="trafficPicker" class="choice-grid four"><button data-traffic="relaxed" class="selected">RELAXED<small>Easy-going traffic</small></button><button data-traffic="normal">NORMAL<small>Steady operation</small></button><button data-traffic="rush">HUB RUSH<small>Busy FedEx bank</small></button><button data-traffic="chaos">CHAOS<small>High workload</small></button></div></div>
@@ -131,13 +140,14 @@
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-  <script src="map-data.js?v=0.3.0"></script>
-  <script src="gate-730-extension.js?v=0.3.0"></script>
-  <script src="airport-reference.js?v=0.3.0"></script>
-  <script src="phraseology.js?v=0.3.0"></script>
-  <script src="surface-engine.js?v=0.3.0"></script>
-  <script src="radar-engine.js?v=0.3.0"></script>
-  <script src="game.js?v=0.3.0"></script>
-  <script src="simulator-mode.js?v=0.3.0"></script>
+  <script src="map-data.js?v=0.4.0"></script>
+  <script src="gate-730-extension.js?v=0.4.0"></script>
+  <script src="airport-reference.js?v=0.4.0"></script>
+  <script src="phraseology.js?v=0.4.0"></script>
+  <script src="surface-engine.js?v=0.4.0"></script>
+  <script src="radar-engine.js?v=0.4.0"></script>
+  <script src="game.js?v=0.4.0"></script>
+  <script src="simulator-mode.js?v=0.4.0"></script>
+  <script src="flight-controls.js?v=0.4.0"></script>
 </body>
 </html>
